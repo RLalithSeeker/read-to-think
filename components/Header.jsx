@@ -19,18 +19,18 @@ export default function Header({ mode, setMode, onHome, drS }) {
           </button>
           <div className="h-4 w-px bg-bdr" />
           <div className="flex gap-1 bg-card rounded-lg p-1">
-            <button onClick={() => setMode("deepread")} className={"tb" + (mode === "deepread" ? " on" : "")}><i className="fas fa-layer-group mr-1.5 text-xs" />Deep Read</button>
-            <button onClick={() => setMode("chat")} className={"tb" + (mode === "chat" ? " on" : "")}><i className="fas fa-comments mr-1.5 text-xs" />AI Companion</button>
+            <button onClick={() => setMode("deepread")} className={"tb" + (mode === "deepread" ? " on" : "")}><i className="fas fa-layer-group sm:mr-1.5 text-xs" /><span className="hidden sm:inline">Deep Read</span></button>
+            <button onClick={() => setMode("chat")} className={"tb" + (mode === "chat" ? " on" : "")}><i className="fas fa-comments sm:mr-1.5 text-xs" /><span className="hidden sm:inline">AI Companion</span></button>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {showProg && (
             <>
-              <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2">
                 <div className="w-24 h-1.5 bg-bdr rounded-full overflow-hidden"><div className="pb" style={{ width: pct + "%" }} /></div>
                 <span className="text-[11px] text-muted whitespace-nowrap">{done}/{total} notes</span>
               </div>
-              <div className="h-4 w-px bg-bdr" />
+              <div className="hidden sm:block h-4 w-px bg-bdr" />
             </>
           )}
           <button onClick={() => setReviewOpen(true)} title="Review notes" className="relative w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-fg hover:bg-card transition-all text-sm bg-transparent border-none cursor-pointer">
