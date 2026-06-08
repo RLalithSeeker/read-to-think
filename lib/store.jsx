@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { PROVIDERS, DEFAULT_PROVIDER, providerFromUrl } from "./providers";
 import { loadSrs, saveSrs, schedule, noteKey, dueNotes } from "./srs";
+import { loadLinks, saveLinks, toggleLink, pruneLinks } from "./links";
 
 const AppCtx = createContext(null);
 export const useApp = () => useContext(AppCtx);
@@ -14,6 +15,7 @@ export function AppProvider({ children }) {
   const [notesOpen, setNotesOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [srs, setSrs] = useState({});
+  const [links, setLinks] = useState({});
   const [toastMsg, setToastMsg] = useState(null);
   const toastTimer = useRef(null);
   const [hydrated, setHydrated] = useState(false);
@@ -32,6 +34,7 @@ export function AppProvider({ children }) {
       if (sn) setNotes(JSON.parse(sn));
     } catch (e) {}
     setSrs(loadSrs());
+    setLinks(loadLinks());
     setHydrated(true);
     // open settings on first visit if no key
     try {
@@ -75,14 +78,20 @@ export function AppProvider({ children }) {
       persistNotes(arr);
       return arr;
     });
+    setLinks((prev) => {
+      const next = pruneLinks(prev, String(ts));
+      saveLinks(next);
+      return next;
+    });
   }, [persistNotes]);
 
   const clrNotes = useCallback(() => {
     setNotes((prev) => {
       if (!prev.length) return prev;
       persistNotes([]);
-      try { localStorage.setItem("rt_srs", "{}"); } catch (e) {}
+      try { localStorage.setItem("rt_srs", "{}"); localStorage.setItem("rt_links", "{}"); } catch (e) {}
       setSrs({});
+      setLinks({});
       toast("Notes cleared.");
       return [];
     });
@@ -97,6 +106,14 @@ export function AppProvider({ children }) {
     });
   }, []);
 
+  const toggleNoteLink = useCallback((a, b) => {
+    setLinks((prev) => {
+      const next = toggleLink(prev, a, b);
+      saveLinks(next);
+      return next;
+    });
+  }, []);
+
   const dueCount = dueNotes(srs, notes).length;
 
   const value = {
@@ -106,6 +123,7 @@ export function AppProvider({ children }) {
     notesOpen, setNotesOpen,
     reviewOpen, setReviewOpen,
     srs, gradeNote, dueCount,
+    links, toggleNoteLink,
     toast, toastMsg,
     hydrated,
   };

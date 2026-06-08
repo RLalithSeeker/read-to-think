@@ -25,14 +25,19 @@ colors, fonts, animations copied 1:1. Only ADD features; never alter the look.
 - `components/` — Landing, Header, DeepRead, Chat, NotesSidebar, SettingsModal, Toaster.
 - `app/page.jsx` — orchestrator: view (landing/app), mode (deepread/chat), drS state.
 
+## Live
+Vercel prod: https://read-to-think-sage.vercel.app · deploy via `vercel --prod` (project `read-to-think`).
+
 ## Shipped beyond the original
 - Provider picker (OpenAI / Groq free / Custom).
 - **Chat demo** — "See how it works" loads a canned Socratic exchange, no API key needed (`DEMO_CONV` in `components/Chat.jsx`).
-- **Notes export** — `.md` and `.json` download from the notes sidebar.
+- **Notes export** — `.md` (Obsidian-flavored `[[links]]`) and `.json` from the notes sidebar.
+- **Spaced repetition** — `lib/srs.js` (SM-2 lite, `rt_srs`); recall-first ReviewModal, header due badge.
+- **Zettel note-linking** — `lib/links.js` (symmetric, `rt_links`); link button + picker + chips in sidebar.
 
-## Not built yet (spec §10 roadmap — needs Convex)
-Zettelkasten note-linking · book DB · chapter tracking · multi-book chat · Obsidian-flavored export
-· fluency-illusion detection · spaced repetition · syntopical mode.
+## Not built yet (spec §10 roadmap)
+book DB · chapter tracking · multi-book chat · fluency-illusion auto-detection · syntopical mode.
+These mostly need Convex (server data) — wire Convex when starting them.
 
 ## Push
 `./push.ps1 -Message "..." -Remote <github-url>` — held until explicitly run.
