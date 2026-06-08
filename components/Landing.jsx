@@ -1,5 +1,9 @@
 "use client";
 
+const GITHUB_URL = "https://github.com/RLalithSeeker/read-to-think";
+const LINKEDIN_URL = ""; // paste your LinkedIn profile URL to show the icon
+const FEEDBACK_MAIL = "mailto:starlalith1234@gmail.com?subject=Read%20to%20Think%20%E2%80%94%20feedback&body=What%20I%20loved%2C%20and%20what%20I%27d%20want%20next%3A%0A%0A";
+
 export default function Landing({ onDemo, onOpenApp }) {
   return (
     <section className="relative z-10 min-h-screen flex flex-col">
@@ -132,12 +136,30 @@ export default function Landing({ onDemo, onOpenApp }) {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-bdr py-8 px-6 text-center">
-        <div className="flex items-center justify-center gap-2 mb-2">
+      <footer className="border-t border-bdr py-10 px-6 text-center">
+        <div className="flex items-center justify-center gap-2 mb-5">
           <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center"><i className="fas fa-brain text-bg text-[10px]" /></div>
           <span className="serif font-semibold text-fg text-sm">Read to Think</span>
         </div>
-        <p className="text-muted/60 text-xs">Built on Adler, Luhmann, and cognitive science. Your key never leaves your browser.</p>
+
+        <div className="flex items-center justify-center gap-6 mb-5">
+          <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="text-muted hover:text-accent transition-colors text-sm flex items-center gap-2">
+            <i className="fab fa-github text-base" /><span className="hidden sm:inline">GitHub</span>
+          </a>
+          {LINKEDIN_URL && (
+            <a href={LINKEDIN_URL} target="_blank" rel="noreferrer" className="text-muted hover:text-accent transition-colors text-sm flex items-center gap-2">
+              <i className="fab fa-linkedin-in text-base" /><span className="hidden sm:inline">LinkedIn</span>
+            </a>
+          )}
+          <a href={FEEDBACK_MAIL} className="text-muted hover:text-accent transition-colors text-sm flex items-center gap-2">
+            <i className="fas fa-envelope text-base" /><span className="hidden sm:inline">Feedback</span>
+          </a>
+        </div>
+
+        <p className="text-muted text-sm mb-2">
+          Love it, or want a feature? <a href={FEEDBACK_MAIL} className="text-accent hover:text-accent-h transition-colors">Tell me</a> — I read everything.
+        </p>
+        <p className="text-muted/50 text-xs">Built on Adler, Luhmann, and cognitive science. Your key never leaves your browser.</p>
       </footer>
     </section>
   );
