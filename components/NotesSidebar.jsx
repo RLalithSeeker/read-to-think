@@ -5,8 +5,37 @@ function plain(content) {
   return String(content || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().substring(0, 150);
 }
 
+function fullPlain(content) {
+  return String(content || "").replace(/<[^>]*>/g, " ").replace(/[ \t]+/g, " ").trim();
+}
+
+function download(name, text, type) {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function NotesSidebar() {
   const { notes, notesOpen, setNotesOpen, delNote, clrNotes } = useApp();
+
+  function exportMd() {
+    const date = new Date().toISOString().slice(0, 10);
+    let md = "# Read to Think — Notes\n\n_Exported " + date + "_\n";
+    for (const n of notes) {
+      const kind = n.type === "dr" ? "Deep Read" : "Chat";
+      md += "\n## " + (n.book || "Untitled") + " · " + kind + "\n\n" + fullPlain(n.content) + "\n";
+    }
+    download("read-to-think-notes-" + date + ".md", md, "text/markdown");
+  }
+
+  function exportJson() {
+    const date = new Date().toISOString().slice(0, 10);
+    download("read-to-think-notes-" + date + ".json", JSON.stringify(notes, null, 2), "application/json");
+  }
 
   return (
     <>
@@ -45,7 +74,15 @@ export default function NotesSidebar() {
             })
           )}
         </div>
-        <div className="px-4 py-3 border-t border-bdr">
+        <div className="px-4 py-3 border-t border-bdr flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={exportMd} disabled={!notes.length} className="text-[11px] text-muted/60 hover:text-accent transition-colors cursor-pointer bg-transparent border-none font-[inherit] disabled:opacity-30 disabled:cursor-not-allowed">
+              <i className="fas fa-file-arrow-down mr-1" />.md
+            </button>
+            <button onClick={exportJson} disabled={!notes.length} className="text-[11px] text-muted/60 hover:text-accent transition-colors cursor-pointer bg-transparent border-none font-[inherit] disabled:opacity-30 disabled:cursor-not-allowed">
+              <i className="fas fa-file-code mr-1" />.json
+            </button>
+          </div>
           <button onClick={clrNotes} className="text-[11px] text-muted/50 hover:text-terra transition-colors cursor-pointer bg-transparent border-none font-[inherit]">Clear all</button>
         </div>
       </aside>

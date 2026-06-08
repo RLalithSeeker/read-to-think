@@ -6,6 +6,15 @@ import { F } from "@/lib/format";
 
 let MID = 0;
 
+// Canned example conversation so new users understand the Socratic style
+// WITHOUT needing an API key. Loaded read-only, clearly labelled as a demo.
+const DEMO_CONV = [
+  { role: "user", content: "I just read the chapter on System 1 and System 2 in Thinking, Fast and Slow. I learned that System 1 is fast and intuitive and System 2 is slow and logical." },
+  { role: "assistant", content: "That's the textbook label — but notice you just *restated* Kahneman's vocabulary. Let me push: can you give me a moment from **your own day** where System 1 gave you an answer that System 2 would have rejected? If you can't, you recognised the idea but haven't reconstructed it yet." },
+  { role: "user", content: "Hmm. This morning I assumed a long email was urgent just because it was long, and replied first — but it wasn't urgent at all." },
+  { role: "assistant", content: "Good — now you're thinking, not summarising. So what *rule* did System 1 secretly use there? Not \"length means urgent\" — say it as a bias you could catch next time. And here's the harder question: does knowing the name \"System 1\" actually help you stop it, or does it just make you *feel* like you understand your own mind?" },
+];
+
 function gQA(cBk, cMsgs) {
   const bk = cBk;
   const has = cMsgs.length > 0;
@@ -37,6 +46,7 @@ export default function Chat() {
   const [cBk, setCBk] = useState("");
   const [cStr, setCStr] = useState(false);
   const [input, setInput] = useState("");
+  const [isDemo, setIsDemo] = useState(false);
   const ctrlRef = useRef(null);
   const scRef = useRef(null);
   const inRef = useRef(null);
@@ -60,6 +70,15 @@ export default function Chat() {
     if (!el) return;
     el.style.height = "auto";
     el.style.height = Math.min(el.scrollHeight, 150) + "px";
+  }
+
+  function loadDemo() {
+    setIsDemo(true);
+    setCMsgs(DEMO_CONV.map((m, i) => ({ ...m, id: -(i + 1) })));
+  }
+  function exitDemo() {
+    setIsDemo(false);
+    setCMsgs([]);
   }
 
   function fireQA(idx) {
@@ -132,7 +151,9 @@ export default function Chat() {
     if (!txt || cStr) return;
     if (!cfg.key) { setSettingsOpen(true); toast("Set your API key first."); return; }
     const um = { role: "user", content: txt, id: ++MID };
-    const history = [...cMsgs, um];
+    const base = isDemo ? [] : cMsgs; // drop the read-only demo before a real chat
+    if (isDemo) setIsDemo(false);
+    const history = [...base, um];
     setCMsgs(history);
     setInput("");
     requestAnimationFrame(() => autosize(inRef.current));
@@ -182,9 +203,18 @@ export default function Chat() {
                 <button key={i} onClick={() => fireQA(i)} className="qc flex items-center gap-2"><i className={"fas " + a.i + " text-accent/60 text-[10px]"} />{a.l}</button>
               ))}
             </div>
+            <button onClick={loadDemo} className="mt-6 text-sm text-muted hover:text-accent transition-colors bg-transparent border-none cursor-pointer font-[inherit] anim-up" style={{ animationDelay: ".3s" }}>
+              <i className="fas fa-wand-magic-sparkles mr-1.5 text-xs" />See how it works — no key needed
+            </button>
           </div>
         ) : (
           <div className="max-w-3xl mx-auto px-4 md:px-6 py-6 space-y-5">
+            {isDemo && (
+              <div className="flex items-center justify-between gap-3 bg-accent/[0.06] border border-accent/20 rounded-xl px-4 py-2.5 anim-up">
+                <span className="text-xs text-accent"><i className="fas fa-wand-magic-sparkles mr-1.5" />Example conversation — set your key and type to start a real one.</span>
+                <button onClick={exitDemo} className="text-xs text-muted hover:text-fg transition-colors bg-transparent border-none cursor-pointer font-[inherit] whitespace-nowrap">Clear</button>
+              </div>
+            )}
             {cMsgs.map((m) => {
               const isU = m.role === "user";
               if (isU) {

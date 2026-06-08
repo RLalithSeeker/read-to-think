@@ -25,8 +25,13 @@ colors, fonts, animations copied 1:1. Only ADD features; never alter the look.
 - `components/` — Landing, Header, DeepRead, Chat, NotesSidebar, SettingsModal, Toaster.
 - `app/page.jsx` — orchestrator: view (landing/app), mode (deepread/chat), drS state.
 
+## Shipped beyond the original
+- Provider picker (OpenAI / Groq free / Custom).
+- **Chat demo** — "See how it works" loads a canned Socratic exchange, no API key needed (`DEMO_CONV` in `components/Chat.jsx`).
+- **Notes export** — `.md` and `.json` download from the notes sidebar.
+
 ## Not built yet (spec §10 roadmap — needs Convex)
-Zettelkasten note-linking · book DB · chapter tracking · multi-book chat · export (MD/Obsidian/JSON)
+Zettelkasten note-linking · book DB · chapter tracking · multi-book chat · Obsidian-flavored export
 · fluency-illusion detection · spaced repetition · syntopical mode.
 
 ## Push
