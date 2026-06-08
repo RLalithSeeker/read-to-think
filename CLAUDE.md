@@ -35,6 +35,10 @@ Vercel prod: https://read-to-think-sage.vercel.app · deploy via `vercel --prod`
 - **Spaced repetition** — `lib/srs.js` (SM-2 lite, `rt_srs`); recall-first ReviewModal, header due badge.
 - **Zettel note-linking** — `lib/links.js` (symmetric, `rt_links`); link button + picker + chips in sidebar.
 - **Fluency-illusion detection** — `lib/fluency.js`; live word-overlap heuristic under the atomic note (good/caution/warn + borrowed words) plus optional "Check deeper with AI" (BYO key, non-streaming).
+- **Expanded landing** — How it works / Two ways in / Features grid / "What this is not" / final CTA + footer. Theme tokens reused, hero+cards+quote untouched.
+- **Mobile** — header was overflowing (521>390); fixed: tab labels collapse to icons + progress bar hidden below sm. Verified clean at 390px across all screens.
+
+Groq default model `llama-3.3-70b-versatile` verified live on Groq /models (2026-06-08).
 
 ## Not built yet (spec §10 roadmap — need Convex)
 book DB · chapter tracking · multi-book chat · syntopical mode.
