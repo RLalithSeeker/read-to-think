@@ -57,18 +57,20 @@ export default function DeepRead({ drS, setDrS, onHome }) {
   function saveNC(idx) {
     const an = (drS.an[idx] || "").trim();
     if (!an) { toast("Write your atomic note first."); return; }
+    const isNew = !drS.notes.some((n) => n.ci === idx);
+    // pure state update — no side effects inside the updater
     setDrS((s) => {
       const notes = s.notes.slice();
       const exist = notes.findIndex((n) => n.ci === idx);
-      let isNew = false;
-      if (exist >= 0) { notes[exist] = { ...notes[exist], note: an, st: s.st[idx] ?? 50 }; }
-      else { notes.push({ id: notes.length + 1, ci: idx, claim: s.claims[idx].text, note: an, st: s.st[idx] ?? 50 }); isNew = true; }
-      if (isNew) addNote({ content: an, book: s.title || "Deep Read", ts: Date.now(), type: "dr" });
+      if (exist >= 0) notes[exist] = { ...notes[exist], note: an, st: s.st[idx] ?? 50 };
+      else notes.push({ id: notes.length + 1, ci: idx, claim: s.claims[idx].text, note: an, st: s.st[idx] ?? 50 });
       const next = { ...s, notes };
       if (idx + 1 < s.claims.length) next.idx = idx + 1;
       else next.step = "collect";
       return next;
     });
+    // side effect lives outside the updater, runs exactly once
+    if (isNew) addNote({ content: an, book: drS.title || "Deep Read", ts: Date.now(), type: "dr" });
   }
 
   // ---------- render ----------
