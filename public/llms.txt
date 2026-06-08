@@ -1,0 +1,18 @@
+# Read to Think
+
+> A reading companion that refuses to summarize. Two modes — a structured "Deep Read"
+> workflow and an AI "Socratic Companion" chat — both designed to make reading change
+> your thinking, not transfer information.
+
+## Philosophy
+- Mortimer Adler (How to Read a Book): the highest reading asks "what does this book do to what I already believe?"
+- Niklas Luhmann (Zettelkasten): one idea per note, in your own words; writing is the thinking.
+- Rozenblit & Keil (Yale): re-reading creates recognition, not understanding (the illusion of fluency).
+
+## Modes
+- Deep Read: paste text -> extract claims -> think-first -> reveal author -> take a stance -> write an atomic note.
+- AI Companion: a Socratic chat that never summarizes and probes your understanding.
+
+## Privacy
+- Bring your own API key (OpenAI or Groq). The key stays in your browser and is sent
+  directly to the provider you choose. It never touches our server.
