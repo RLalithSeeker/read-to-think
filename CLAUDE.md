@@ -34,10 +34,17 @@ Vercel prod: https://read-to-think-sage.vercel.app · deploy via `vercel --prod`
 - **Notes export** — `.md` (Obsidian-flavored `[[links]]`) and `.json` from the notes sidebar.
 - **Spaced repetition** — `lib/srs.js` (SM-2 lite, `rt_srs`); recall-first ReviewModal, header due badge.
 - **Zettel note-linking** — `lib/links.js` (symmetric, `rt_links`); link button + picker + chips in sidebar.
+- **Fluency-illusion detection** — `lib/fluency.js`; live word-overlap heuristic under the atomic note (good/caution/warn + borrowed words) plus optional "Check deeper with AI" (BYO key, non-streaming).
 
-## Not built yet (spec §10 roadmap)
-book DB · chapter tracking · multi-book chat · fluency-illusion auto-detection · syntopical mode.
-These mostly need Convex (server data) — wire Convex when starting them.
+## Not built yet (spec §10 roadmap — need Convex)
+book DB · chapter tracking · multi-book chat · syntopical mode.
+Wire Convex when starting these (server data / multi-user).
+
+## Testing note
+No automated suite yet. Verify logic with a throwaway `node _x.mjs` importing `lib/*`,
+and UI via headless Chrome through the puppeteer MCP (executablePath to system Chrome).
+Watch for: side effects inside React state updaters (StrictMode double-invokes — caused a
+duplicate-note bug, fixed in DeepRead saveNC).
 
 ## Push
 `./push.ps1 -Message "..." -Remote <github-url>` — held until explicitly run.

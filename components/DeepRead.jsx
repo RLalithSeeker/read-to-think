@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useApp } from "@/lib/store";
 import { extCl } from "@/lib/deepread";
+import { analyzeFluency } from "@/lib/fluency";
 
 function stanceLabel(v) {
   v = parseInt(v);
@@ -13,12 +14,42 @@ function stanceLabel(v) {
 }
 
 export default function DeepRead({ drS, setDrS, onHome }) {
-  const { addNote, toast } = useApp();
+  const { addNote, toast, cfg, setSettingsOpen } = useApp();
   const [pasteText, setPasteText] = useState("");
+  const [deep, setDeep] = useState({ loading: false, text: "", error: "" });
   const bodyRef = useRef(null);
 
   const scrollTop = () => { if (bodyRef.current) bodyRef.current.scrollTop = 0; };
   useEffect(scrollTop, [drS.step, drS.idx]);
+  // reset the optional AI check when moving to another claim
+  useEffect(() => { setDeep({ loading: false, text: "", error: "" }); }, [drS.idx, drS.step]);
+
+  async function deepCheck(i) {
+    const cl = drS.claims[i];
+    const note = (drS.an[i] || "").trim();
+    if (note.length < 10) { toast("Write your atomic note first."); return; }
+    if (!cfg.key) { setSettingsOpen(true); toast("Set your API key first."); return; }
+    setDeep({ loading: true, text: "", error: "" });
+    try {
+      const res = await fetch(cfg.url.replace(/\/+$/, "") + "/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + cfg.key },
+        body: JSON.stringify({
+          model: cfg.model, temperature: 0.3, max_tokens: 220,
+          messages: [
+            { role: "system", content: "You judge whether a reader's atomic note reconstructs an idea in their OWN words or just parrots the author's vocabulary. Be terse — at most 2 sentences. If they parroted, name one specific word or phrase to rephrase. End with a final line exactly: VERDICT: OWN WORDS | PARTLY PARROTED | PARROTED" },
+            { role: "user", content: "AUTHOR:\n" + cl.text + "\n" + cl.reasoning + "\n\nMY NOTE:\n" + note },
+          ],
+        }),
+      });
+      if (!res.ok) throw new Error(res.status === 401 ? "Invalid API key. Open settings." : "Request failed.");
+      const data = await res.json();
+      const txt = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || "").trim() || "(no response)";
+      setDeep({ loading: false, text: txt, error: "" });
+    } catch (err) {
+      setDeep({ loading: false, text: "", error: err.message || "Check failed." });
+    }
+  }
 
   const drGo = (step) => setDrS((s) => ({ ...s, step }));
   const setField = (field, idx, val) => setDrS((s) => ({ ...s, [field]: { ...s[field], [idx]: val } }));
@@ -127,6 +158,7 @@ export default function DeepRead({ drS, setDrS, onHome }) {
         const sv = drS.st[i] ?? 50;
         const sl = stanceLabel(sv);
         const lockCls = iR ? "" : "opacity-30 pointer-events-none";
+        const fl = analyzeFluency(drS.an[i] || "", cl.text + " " + cl.reasoning + " " + (cl.fq || ""));
         return (
           <div className="max-w-2xl mx-auto px-6 py-12">
             <div className="anim-up">
@@ -200,6 +232,37 @@ export default function DeepRead({ drS, setDrS, onHome }) {
                 <p className="text-muted text-sm mb-3 ml-7">Write <span className="text-fg font-medium">one insight</span> in your own words. Not a summary.</p>
                 <div className="ml-7">
                   <textarea className="dr-ta" rows={4} placeholder="The key insight for me is..." value={drS.an[i] || ""} onChange={(e) => setField("an", i, e.target.value)} />
+
+                  {/* fluency indicator — flags when the note reuses the author's words */}
+                  {(fl.level === "good" || fl.level === "caution" || fl.level === "warn") && (
+                    <div className="mt-2 text-xs leading-relaxed">
+                      {fl.level === "good" && (
+                        <span className="text-sage"><i className="fas fa-circle-check mr-1.5" />In your own words — only {Math.round(fl.ratio * 100)}% overlaps the author.</span>
+                      )}
+                      {fl.level === "caution" && (
+                        <span className="text-accent"><i className="fas fa-circle-half-stroke mr-1.5" />Some of the author&apos;s vocabulary ({fl.borrowed.join(", ")}). Make sure the framing is yours.</span>
+                      )}
+                      {fl.level === "warn" && (
+                        <span className="text-terra"><i className="fas fa-triangle-exclamation mr-1.5" />This mostly echoes the author ({fl.borrowed.join(", ")}). Say what <span className="text-fg font-medium">changed in your thinking</span>, not what the author said.</span>
+                      )}
+                    </div>
+                  )}
+
+                  {fl.noteCount >= 4 && (
+                    <div className="mt-2">
+                      <button onClick={() => deepCheck(i)} disabled={deep.loading} className="text-xs text-muted hover:text-accent transition-colors bg-transparent border-none cursor-pointer font-[inherit] disabled:opacity-50">
+                        {deep.loading ? <><i className="fas fa-circle-notch fa-spin mr-1.5" />Checking…</> : <><i className="fas fa-wand-magic-sparkles mr-1.5" />Check deeper with AI</>}
+                      </button>
+                    </div>
+                  )}
+
+                  {deep.error && <p className="mt-2 text-xs text-terra"><i className="fas fa-circle-exclamation mr-1.5" />{deep.error}</p>}
+                  {deep.text && (
+                    <div className="mt-2 bg-[#141412] border border-bdr rounded-lg p-3">
+                      <p className="text-[10px] text-accent tracking-wider uppercase font-medium mb-1.5"><i className="fas fa-wand-magic-sparkles mr-1" />AI check</p>
+                      <p className="text-xs leading-relaxed text-fg/80 whitespace-pre-wrap">{deep.text}</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
