@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { PROVIDERS, DEFAULT_PROVIDER, providerFromUrl } from "./providers";
+import { loadSrs, saveSrs, schedule, noteKey, dueNotes } from "./srs";
 
 const AppCtx = createContext(null);
 export const useApp = () => useContext(AppCtx);
@@ -11,6 +12,8 @@ export function AppProvider({ children }) {
   const [notes, setNotes] = useState([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [srs, setSrs] = useState({});
   const [toastMsg, setToastMsg] = useState(null);
   const toastTimer = useRef(null);
   const [hydrated, setHydrated] = useState(false);
@@ -28,6 +31,7 @@ export function AppProvider({ children }) {
       const sn = localStorage.getItem("rt_notes");
       if (sn) setNotes(JSON.parse(sn));
     } catch (e) {}
+    setSrs(loadSrs());
     setHydrated(true);
     // open settings on first visit if no key
     try {
@@ -77,16 +81,31 @@ export function AppProvider({ children }) {
     setNotes((prev) => {
       if (!prev.length) return prev;
       persistNotes([]);
+      try { localStorage.setItem("rt_srs", "{}"); } catch (e) {}
+      setSrs({});
       toast("Notes cleared.");
       return [];
     });
   }, [persistNotes, toast]);
+
+  const gradeNote = useCallback((n, grade) => {
+    setSrs((prev) => {
+      const key = noteKey(n);
+      const next = { ...prev, [key]: schedule(prev[key], grade) };
+      saveSrs(next);
+      return next;
+    });
+  }, []);
+
+  const dueCount = dueNotes(srs, notes).length;
 
   const value = {
     cfg, saveCfg,
     notes, addNote, delNote, clrNotes,
     settingsOpen, setSettingsOpen,
     notesOpen, setNotesOpen,
+    reviewOpen, setReviewOpen,
+    srs, gradeNote, dueCount,
     toast, toastMsg,
     hydrated,
   };

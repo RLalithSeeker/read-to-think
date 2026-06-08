@@ -2,7 +2,7 @@
 import { useApp } from "@/lib/store";
 
 export default function Header({ mode, setMode, onHome, drS }) {
-  const { notes, setNotesOpen, setSettingsOpen } = useApp();
+  const { notes, setNotesOpen, setSettingsOpen, setReviewOpen, dueCount } = useApp();
 
   const showProg = mode === "deepread" && drS.step === "think";
   const total = drS.claims.length;
@@ -33,6 +33,12 @@ export default function Header({ mode, setMode, onHome, drS }) {
               <div className="h-4 w-px bg-bdr" />
             </>
           )}
+          <button onClick={() => setReviewOpen(true)} title="Review notes" className="relative w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-fg hover:bg-card transition-all text-sm bg-transparent border-none cursor-pointer">
+            <i className="fas fa-rotate" />
+            {dueCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-sage text-bg text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">{dueCount > 9 ? "9+" : dueCount}</span>
+            )}
+          </button>
           <button onClick={() => setNotesOpen(true)} className="relative w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-fg hover:bg-card transition-all text-sm bg-transparent border-none cursor-pointer">
             <i className="fas fa-bookmark" />
             {notes.length > 0 && (

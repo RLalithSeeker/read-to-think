@@ -8,6 +8,7 @@ import DeepRead from "@/components/DeepRead";
 import Chat from "@/components/Chat";
 import NotesSidebar from "@/components/NotesSidebar";
 import SettingsModal from "@/components/SettingsModal";
+import ReviewModal from "@/components/ReviewModal";
 import Toaster from "@/components/Toaster";
 
 const FRESH = { step: "input", claims: [], idx: 0, notes: [], ref: {}, st: {}, stx: {}, an: {}, rev: {}, title: "" };
@@ -54,6 +55,7 @@ function Shell() {
 
       <SettingsModal />
       <NotesSidebar />
+      <ReviewModal />
       <Toaster />
     </>
   );
