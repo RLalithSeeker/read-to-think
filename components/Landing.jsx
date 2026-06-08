@@ -2,7 +2,7 @@
 
 const GITHUB_URL = "https://github.com/RLalithSeeker/read-to-think";
 const LINKEDIN_URL = ""; // paste your LinkedIn profile URL to show the icon
-const FEEDBACK_MAIL = "mailto:starlalith1234@gmail.com?subject=Read%20to%20Think%20%E2%80%94%20feedback&body=What%20I%20loved%2C%20and%20what%20I%27d%20want%20next%3A%0A%0A";
+const FEEDBACK_MAIL = "mailto:ravula.lalith@gmail.com?subject=Read%20to%20Think%20%E2%80%94%20feedback&body=What%20I%20loved%2C%20and%20what%20I%27d%20want%20next%3A%0A%0A";
 
 export default function Landing({ onDemo, onOpenApp }) {
   return (
