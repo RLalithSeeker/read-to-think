@@ -13,11 +13,19 @@ function stanceLabel(v) {
   return { text: "Strongly Agree", cls: "text-sage" };
 }
 
-export default function DeepRead({ drS, setDrS, onHome }) {
+export default function DeepRead({ drS, setDrS, onHome, seed, seedKey }) {
   const { addNote, toast, cfg, setSettingsOpen } = useApp();
   const [pasteText, setPasteText] = useState("");
   const [deep, setDeep] = useState({ loading: false, text: "", error: "" });
   const bodyRef = useRef(null);
+
+  // seed from Reader's "Think on this" — drop a passage straight into the input step
+  useEffect(() => {
+    if (seed && seed.trim()) {
+      setPasteText(seed);
+      setDrS((s) => ({ ...s, step: "input" }));
+    }
+  }, [seedKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const scrollTop = () => { if (bodyRef.current) bodyRef.current.scrollTop = 0; };
   useEffect(scrollTop, [drS.step, drS.idx]);

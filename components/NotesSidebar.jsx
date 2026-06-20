@@ -38,7 +38,7 @@ export default function NotesSidebar() {
     const date = new Date().toISOString().slice(0, 10);
     let md = "# Read to Think — Notes\n\n_Exported " + date + "_\n";
     for (const n of notes) {
-      const kind = n.type === "dr" ? "Deep Read" : "Chat";
+      const kind = n.type === "dr" ? "Deep Read" : n.type === "read" ? "Reading" : "Chat";
       md += "\n## " + (n.book || "Untitled") + " · " + kind + "\n\n" + fullPlain(n.content) + "\n";
       const linked = (links[keyOf(n)] || []).map((k) => byKey[k]).filter(Boolean);
       if (linked.length) {
@@ -81,6 +81,8 @@ export default function NotesSidebar() {
                       {n.book}
                       {n.type === "dr" ? (
                         <span className="text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded ml-1">Deep Read</span>
+                      ) : n.type === "read" ? (
+                        <span className="text-[9px] bg-terra/15 text-terra px-1.5 py-0.5 rounded ml-1">Reading</span>
                       ) : (
                         <span className="text-[9px] bg-sage/15 text-sage px-1.5 py-0.5 rounded ml-1">Chat</span>
                       )}

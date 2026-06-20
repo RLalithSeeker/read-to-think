@@ -40,9 +40,20 @@ Vercel prod: https://read-to-think-sage.vercel.app · deploy via `vercel --prod`
 
 Groq default model `llama-3.3-70b-versatile` verified live on Groq /models (2026-06-08).
 
-## Not built yet (spec §10 roadmap — need Convex)
-book DB · chapter tracking · multi-book chat · syntopical mode.
-Wire Convex when starting these (server data / multi-user).
+## Read mode — book library (Phase 1+2, 2026-06-20)
+New third mode tab **Read** (`mode === "read"`). Local-first, zero new deps.
+- `lib/idb.js` — zero-dep IndexedDB (`rt_library` db, stores `books` + `marks`). Book text too big for localStorage. NO Dexie. Convex sync deferred to Phase 3.
+- `lib/reader.js` — REACTIONS taxonomy (`? ! ✗ ↔ ★`), `toBlocks` paragraph splitter, `guessTitle`.
+- `components/Library.jsx` — shelf: add book (paste or .txt/.md FileReader upload), list, open, delete. EPUB/PDF parsing NOT done (needs epubjs/pdf.js).
+- `components/Reader.jsx` — paginated reader; **react-don't-highlight** (mark MUST carry a reaction, prompt reactions force a note = anti-fluency-illusion); **recall-gate** on return (reopen → "why did you mark this, from memory" before page); scroll-position persistence (debounced → book.pos); session timer; marks drawer; "Think on this" → Deep Read.
+- `components/ReaderAI.jsx` — **Phase 2**, passage-scoped bottom-sheet. Socratic (stream) + Quiz-me (recall test). BYO key, browser-direct (§9.9). 3 system prompts (SOCRATIC/QGEN/JUDGE) hard-ban summary. Quiz fuses LLM judge (`VERDICT: OWN WORDS|PARTLY PARROTED|PARROTED`) + local `fluency.js` borrowed-word chips. AI only ever sees a selection or viewport passage (≤1800 chars), NEVER `book.text`.
+- Wiring: `page.jsx` new `read` mode + Reader→DeepRead `seed` bridge; `Header.jsx` Read tab; `DeepRead.jsx` `seed`/`seedKey` props; `NotesSidebar.jsx` "Reading" badge (note type `read`).
+- Gotcha: fallow flags `idb.js`/`reader.js` (+ existing providers/links/srs) as "100% dead" while listing real importers — it misresolves the `@/` alias. Do NOT run `fallow fix --yes` here; it would delete used exports and break the build.
+- PENDING before deploy: 390px puppeteer verify (owner gate, not yet run).
+
+## Not built yet (spec §10 roadmap)
+Phase 3 = Convex sync (cross-device books/marks) + syntopical multi-book + chapter tracking.
+Books/marks are LOCAL (IndexedDB) until then. Wire Convex only at Phase 3.
 
 ## Testing note
 No automated suite yet. Verify logic with a throwaway `node _x.mjs` importing `lib/*`,

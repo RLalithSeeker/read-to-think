@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Read to Think</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        bg: '#0F0F0E', card: '#1A1A18', fg: '#E8E2D6', muted: '#9B9485',
+        accent: '#C8965A', sage: '#7B9A6B', terra: '#B07060',
+        bdr: '#2A2A26', 'bdr-l': '#3A3A34'
+      },
+      fontFamily: {
+        serif: ['Lora','Georgia','serif'],
+        sans: ['DM Sans','system-ui','sans-serif']
+      }
+    }
+  }
+}
+</script>
+<style>
+  body{background:#0F0F0E;color:#E8E2D6;font-family:'DM Sans',system-ui,sans-serif;margin:0;overflow-x:hidden}
+  h1,h2,h3,h4,.serif{font-family:'Lora',Georgia,serif}
+  ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#2A2A26;border-radius:3px}
+  .anim-up{animation:au .5s ease-out both}
+  @keyframes au{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .reasoning-box{max-height:0;overflow:hidden;opacity:0;transition:max-height .7s cubic-bezier(.4,0,.2,1),opacity .5s ease .1s}
+  .reasoning-box.open{max-height:600px;opacity:1}
+  input[type="range"]{-webkit-appearance:none;background:transparent;width:100%;cursor:pointer}
+  input[type="range"]::-webkit-slider-runnable-track{height:4px;background:linear-gradient(to right,#B07060,#9B9485,#7B9A6B);border-radius:2px}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#E8E2D6;border:3px solid #C8965A;margin-top:-9px}
+  .dr-ta{background:#141412;border:1px solid #2A2A26;color:#E8E2D6;resize:vertical;border-radius:8px;padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;width:100%;outline:none;transition:border-color .3s}
+  .dr-ta:focus{border-color:#C8965A}.dr-ta::placeholder{color:#5A5550}
+  .nc{background:#1A1A18;border:1px solid #2A2A26;border-radius:10px;padding:20px;transition:all .3s}
+  .nc:hover{border-color:rgba(200,150,90,.4);transform:translateY(-2px)}
+  .pc{background:#141412;border:1px solid #2A2A26;border-radius:12px;padding:28px;transition:all .3s}
+  .pc:hover{border-color:#3A3A34;transform:translateY(-3px)}
+  .cr{border:1px solid #2A2A26;border-radius:8px;padding:16px 20px;transition:border-color .3s}
+  .cr.done{border-color:rgba(123,154,107,.2)}
+  .bm{background:#C8965A;color:#0F0F0E;font-weight:600;padding:12px 28px;border-radius:8px;border:none;cursor:pointer;font-size:15px;transition:all .3s;font-family:'DM Sans',sans-serif}
+  .bm:hover{background:#D4A66A;transform:translateY(-1px)}.bm:disabled{opacity:.35;cursor:not-allowed;transform:none}
+  .bs{background:transparent;color:#9B9485;font-weight:500;padding:10px 20px;border-radius:8px;border:1px solid #2A2A26;cursor:pointer;font-size:14px;transition:all .3s;font-family:'DM Sans',sans-serif}
+  .bs:hover{color:#E8E2D6;border-color:#3A3A34;background:#1A1A18}
+  .cmsg p{margin-bottom:.5em}.cmsg p:last-child{margin-bottom:0}
+  .cmsg strong{color:#E8E2D6;font-weight:600}.cmsg em{color:#C8B89A}
+  .dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:#C8965A;animation:dp 1.4s infinite}
+  .dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+  @keyframes dp{0%,60%,100%{opacity:.2}30%{opacity:1}}
+  .mha{opacity:0;transition:opacity .2s}.mw:hover .mha{opacity:1}
+  .qc{border:1px solid #252522;border-radius:999px;padding:6px 14px;font-size:12px;color:#9B9485;cursor:pointer;transition:all .2s;white-space:nowrap;background:transparent;font-family:'DM Sans',sans-serif}
+  .qc:hover{background:rgba(200,150,90,.08);border-color:rgba(200,150,90,.3);color:#E8E2D6}
+  .tb{padding:6px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .25s;border:none;background:transparent;color:#9B9485;font-family:'DM Sans',sans-serif}
+  .tb:hover{color:#E8E2D6}.tb.on{background:rgba(200,150,90,.12);color:#C8965A}
+  .sp{transition:transform .35s cubic-bezier(.4,0,.2,1)}.sp.shut{transform:translateX(100%)}
+  .si{background:#111110;border:1px solid #2A2A26;color:#E8E2D6;border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;width:100%;outline:none;transition:border-color .3s}
+  .si:focus{border-color:#C8965A}.si::placeholder{color:#4A4840}
+  .bi{background:transparent;border:1px solid transparent;color:#9B9485;font-size:13px;padding:4px 8px;border-radius:6px;width:180px;font-family:'DM Sans',sans-serif;transition:all .25s;outline:none}
+  .bi:hover{border-color:#2A2A26}.bi:focus{border-color:#C8965A;color:#E8E2D6;background:#111110;width:240px}.bi::placeholder{color:#3A3830}
+  .ct{background:transparent;border:none;color:#E8E2D6;resize:none;font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.5;width:100%;max-height:150px;outline:none}
+  .ct::placeholder{color:#4A4840}
+  .tst{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:10001;background:#1A1A18;border:1px solid rgba(200,150,90,.3);color:#E8E2D6;padding:12px 24px;border-radius:12px;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.5);animation:au .3s ease-out}
+  .gl{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+  .pb{height:4px;border-radius:2px;background:linear-gradient(to right,#B07060,#9B9485,#7B9A6B);transition:width .5s}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+  @media(max-width:768px){.sp{position:fixed!important;top:0;right:0;bottom:0;width:85vw!important;max-width:360px;z-index:1000}.bi{width:110px}.bi:focus{width:160px}}
+</style>
+</head>
+<body class="min-h-screen relative">
+<div class="gl" style="width:500px;height:500px;background:#C8965A;top:-100px;left:-100px;opacity:.025"></div>
+<div class="gl" style="width:400px;height:400px;background:#7B9A6B;bottom:-50px;right:-50px;opacity:.02"></div>
+
+<!-- JS HEALTH CHECK - remove after confirming -->
+<div id="jsCheck" style="position:fixed;top:8px;right:8px;z-index:99999;font-size:10px;padding:4px 10px;border-radius:6px;cursor:pointer" class="hidden"></div>
+
+<!-- SETTINGS -->
+<div id="setMod" class="fixed inset-0 z-[9999] flex items-center justify-center p-4" style="opacity:0;pointer-events:none;transition:opacity .25s">
+<div class="absolute inset-0 bg-black/60" onclick="closeSet()"></div>
+<div class="relative bg-card border border-bdr rounded-2xl p-6 w-full max-w-md" style="transform:scale(.95);opacity:0;transition:all .25s" id="setBox">
+<div class="flex items-center justify-between mb-6"><h3 class="serif text-lg font-semibold">Connection Settings</h3><button onclick="closeSet()" class="text-muted hover:text-fg transition-colors bg-transparent border-none cursor-pointer"><i class="fas fa-xmark"></i></button></div>
+<div class="space-y-4">
+<div><label class="block text-[11px] text-muted mb-1.5 tracking-wider uppercase font-medium">API Key <span class="text-terra">*</span></label><div class="relative"><input type="password" id="sK" class="si" placeholder="sk-..."><button onclick="togEye()" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-fg transition-colors text-sm bg-transparent border-none cursor-pointer"><i class="fas fa-eye" id="sE"></i></button></div></div>
+<div><label class="block text-[11px] text-muted mb-1.5 tracking-wider uppercase font-medium">Base URL</label><input type="text" id="sU" class="si" placeholder="https://api.openai.com/v1"></div>
+<div><label class="block text-[11px] text-muted mb-1.5 tracking-wider uppercase font-medium">Model</label><input type="text" id="sM" class="si" placeholder="gpt-4o-mini"></div>
+</div>
+<button onclick="saveSet()" class="bm w-full mt-6 py-3">Save & Start</button>
+</div></div>
+
+<!-- NOTES -->
+<div id="nOv" class="fixed inset-0 bg-black/40 z-[998] hidden" onclick="togNotes()"></div>
+<aside id="nPn" class="sp shut fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] bg-bg border-l border-bdr z-[999] flex flex-col">
+<div class="flex items-center justify-between px-5 py-4 border-b border-bdr"><h3 class="serif font-semibold text-sm">Your Notes</h3><button onclick="togNotes()" class="text-muted hover:text-fg transition-colors text-sm bg-transparent border-none cursor-pointer"><i class="fas fa-xmark"></i></button></div>
+<div id="nLs" class="flex-1 overflow-y-auto p-4 space-y-3"><p class="text-muted text-sm text-center py-12">No notes yet.</p></div>
+<div class="px-4 py-3 border-t border-bdr"><button onclick="clrNotes()" class="text-[11px] text-muted/50 hover:text-terra transition-colors cursor-pointer bg-transparent border-none font-[inherit]">Clear all</button></div>
+</aside>
+
+<!-- ====== LANDING ====== -->
+<section id="pgL" class="relative z-10 min-h-screen flex flex-col">
+<nav class="flex items-center justify-between px-6 md:px-12 py-5">
+<div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-accent flex items-center justify-center"><i class="fas fa-brain text-bg text-sm"></i></div><span class="serif font-semibold text-lg text-fg">Read to Think</span></div>
+<button onclick="openApp('chat')" class="text-muted hover:text-accent text-sm transition-colors bg-transparent border-none cursor-pointer font-[inherit]">AI Companion <i class="fas fa-arrow-right ml-1 text-xs"></i></button>
+</nav>
+<div class="flex-1 flex flex-col items-center justify-center px-6 text-center max-w-4xl mx-auto">
+<p class="text-accent text-sm font-medium tracking-widest uppercase mb-6 anim-up">A different kind of reading companion</p>
+<h1 class="serif text-4xl sm:text-5xl md:text-6xl font-bold leading-tight mb-6 anim-up" style="animation-delay:.1s;line-height:1.15">Don't summarize.<br><span class="text-accent">Let the book challenge you.</span></h1>
+<p class="text-muted text-lg md:text-xl max-w-2xl mb-10 leading-relaxed anim-up" style="animation-delay:.2s">Most tools turn books into bullet points. This one turns them into thinking. Built on Adler's analytical reading, Luhmann's Zettelkasten, and cognitive science on why familiarity is the enemy of understanding.</p>
+<div class="flex flex-col sm:flex-row gap-4 anim-up" style="animation-delay:.3s">
+<button onclick="startDemo()" class="bm text-base px-8 py-3.5"><i class="fas fa-play mr-2 text-sm"></i>Try the Demo</button>
+<button onclick="openApp('deepread','input')" class="bs text-base px-8 py-3.5"><i class="fas fa-paste mr-2 text-sm"></i>Paste Your Text</button>
+</div>
+<button onclick="openApp('chat')" class="mt-5 text-sm text-muted hover:text-accent transition-colors bg-transparent border-none cursor-pointer font-[inherit] anim-up" style="animation-delay:.4s"><i class="fas fa-comments mr-1.5 text-xs"></i>Or talk to the AI Companion directly</button>
+</div>
+<div class="max-w-5xl mx-auto px-6 pb-20 pt-8 w-full"><div class="grid md:grid-cols-3 gap-5">
+<div class="pc anim-up" style="animation-delay:.2s"><div class="text-terra text-2xl mb-3"><i class="fas fa-eye-slash"></i></div><h3 class="serif font-semibold text-fg mb-2">The Illusion of Fluency</h3><p class="text-muted text-sm leading-relaxed">Rozenblit & Keil (Yale) proved that re-reading and highlighting create a feeling of knowing that isn't real understanding.</p></div>
+<div class="pc anim-up" style="animation-delay:.3s"><div class="text-sage text-2xl mb-3"><i class="fas fa-pen-nib"></i></div><h3 class="serif font-semibold text-fg mb-2">Write to Think, Not to Store</h3><p class="text-muted text-sm leading-relaxed">Luhmann wrote 70+ books using one idea per slip, always in his own words. His system generated thinking, not storage.</p></div>
+<div class="pc anim-up" style="animation-delay:.4s"><div class="text-accent text-2xl mb-3"><i class="fas fa-arrows-rotate"></i></div><h3 class="serif font-semibold text-fg mb-2">Be Changed, Not Informed</h3><p class="text-muted text-sm leading-relaxed">Adler's highest reading level: what does this do to what I already believe? A book succeeds only when it creates friction.</p></div>
+</div></div>
+<div class="text-center pb-12 px-6"><blockquote class="serif italic text-muted text-sm max-w-lg mx-auto">"A book is a conversation between you and the author. If you only listen, you are not having a conversation."<span class="block mt-2 text-accent not-italic text-xs tracking-wider uppercase">— Mortimer Adler</span></blockquote></div>
+</section>
+
+<!-- ====== APP ====== -->
+<section id="pgA" class="hidden relative z-10 flex flex-col" style="height:100dvh">
+<header class="sticky top-0 z-50 bg-bg/90 backdrop-blur-md border-b border-bdr flex-shrink-0">
+<div class="flex items-center justify-between px-4 md:px-6 py-3">
+<div class="flex items-center gap-3">
+<button onclick="goHome()" class="text-muted hover:text-fg transition-colors text-sm bg-transparent border-none cursor-pointer font-[inherit]"><i class="fas fa-arrow-left mr-1.5"></i><span class="hidden sm:inline">Back</span></button>
+<div class="h-4 w-px bg-bdr"></div>
+<div class="flex gap-1 bg-card rounded-lg p-1">
+<button id="tD" onclick="setMode('deepread')" class="tb on"><i class="fas fa-layer-group mr-1.5 text-xs"></i>Deep Read</button>
+<button id="tC" onclick="setMode('chat')" class="tb"><i class="fas fa-comments mr-1.5 text-xs"></i>AI Companion</button>
+</div></div>
+<div class="flex items-center gap-2">
+<div id="dPW" class="hidden items-center gap-2"><div class="w-24 h-1.5 bg-bdr rounded-full overflow-hidden"><div id="dPB" class="pb" style="width:0%"></div></div><span id="dPT" class="text-[11px] text-muted whitespace-nowrap"></span></div>
+<div id="dPD" class="h-4 w-px bg-bdr hidden"></div>
+<button onclick="togNotes()" class="relative w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-fg hover:bg-card transition-all text-sm bg-transparent border-none cursor-pointer"><i class="fas fa-bookmark"></i><span id="nBd" class="absolute -top-0.5 -right-0.5 bg-accent text-bg text-[9px] font-bold w-4 h-4 rounded-full items-center justify-center hidden">0</span></button>
+<button onclick="openSet()" class="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-fg hover:bg-card transition-all text-sm bg-transparent border-none cursor-pointer"><i class="fas fa-gear"></i></button>
+</div></div></header>
+
+<!-- DEEP READ -->
+<div id="mDR" class="flex-1 overflow-y-auto">
+<div id="dI" class="hidden max-w-2xl mx-auto px-6 py-12"><h2 class="serif text-2xl font-bold mb-2">Paste a passage to think through</h2><p class="text-muted mb-6 text-sm">We will extract claims for you to wrestle with.</p><textarea id="uT" class="dr-ta" rows="10" placeholder="Paste your text here..."></textarea><div class="flex items-center justify-between mt-4"><span id="cCt" class="text-xs text-muted">0 characters</span><button onclick="procText()" class="bm" id="pBt" disabled>Extract Claims <i class="fas fa-arrow-right ml-2 text-sm"></i></button></div></div>
+<div id="dCl" class="hidden max-w-2xl mx-auto px-6 py-12"><div class="mb-8"><h2 class="serif text-2xl font-bold mb-2">Claims to Think Through</h2><p class="text-muted text-sm">We will go through these one by one.</p></div><div id="cLs" class="space-y-3 mb-8"></div><div class="flex justify-between items-center"><button onclick="drBack()" class="bs text-sm"><i class="fas fa-arrow-left mr-2"></i>Back</button><button onclick="beginThink()" class="bm">Begin Thinking <i class="fas fa-arrow-right ml-2 text-sm"></i></button></div></div>
+<div id="dTh" class="hidden max-w-2xl mx-auto px-6 py-12"><div id="tCt"></div></div>
+<div id="dCo" class="hidden max-w-3xl mx-auto px-6 py-12"><div class="mb-8 text-center"><div class="text-accent text-3xl mb-3"><i class="fas fa-feather-pointed"></i></div><h2 class="serif text-3xl font-bold mb-2">Your Thinking, Not a Summary</h2><p class="text-muted max-w-lg mx-auto text-sm">Atomic notes capturing what changed in you.</p></div><div id="cGr" class="grid sm:grid-cols-2 gap-4 mb-10"></div><div class="text-center"><button onclick="goHome()" class="bs"><i class="fas fa-rotate-left mr-2"></i>Start Over</button></div></div>
+</div>
+
+<!-- CHAT -->
+<div id="mCH" class="hidden flex-1 flex flex-col" style="min-height:0">
+<div class="flex-shrink-0 px-4 md:px-6 pt-3"><div class="max-w-3xl mx-auto flex items-center gap-2"><i class="fas fa-book text-accent/50 text-[10px]"></i><input type="text" id="bF" class="bi" placeholder="Set your book..." oninput="cBk=this.value.trim();localStorage.setItem('rt_bk',cBk)"></div></div>
+<div id="cSc" class="flex-1 overflow-y-auto">
+<div id="cWe" class="flex flex-col items-center justify-center h-full px-6 text-center"><div class="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6 anim-up"><i class="fas fa-brain text-accent text-xl"></i></div><h2 class="serif text-2xl md:text-3xl font-bold mb-3 anim-up" style="animation-delay:.08s">AI Socratic Companion</h2><p class="text-muted max-w-md mb-8 leading-relaxed text-sm md:text-base anim-up" style="animation-delay:.15s">I will not summarize your book. I will challenge your reading and force you to think harder.</p><div class="flex flex-wrap justify-center gap-3 anim-up" style="animation-delay:.22s"><button onclick="fireQA(0)" class="qc flex items-center gap-2"><i class="fas fa-compass text-accent/60 text-[10px]"></i>Help me choose a book</button><button onclick="fireQA(1)" class="qc flex items-center gap-2"><i class="fas fa-book-open text-accent/60 text-[10px]"></i>I know what I am reading</button></div></div>
+<div id="cMs" class="hidden max-w-3xl mx-auto px-4 md:px-6 py-6 space-y-5"></div>
+</div>
+<div id="qBr" class="flex-shrink-0 px-4 md:px-6 pb-2 hidden"><div id="qCs" class="flex flex-wrap gap-2 max-w-3xl mx-auto"></div></div>
+<div class="flex-shrink-0 px-4 md:px-6 pb-4 pt-1"><div class="max-w-3xl mx-auto"><div class="flex items-end gap-2 bg-[#141412] border border-bdr rounded-2xl p-2 transition-colors focus-within:border-accent/40"><textarea id="cIn" class="ct flex-1 p-2" placeholder="Share what you learned from this chapter..." rows="1"></textarea><button id="sBt" onclick="sendMsg()" class="w-10 h-10 rounded-xl bg-accent text-bg flex items-center justify-center flex-shrink-0 transition-all hover:brightness-110 disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer border-none" disabled><i class="fas fa-arrow-up text-sm" id="sIc"></i></button></div><p class="text-[10px] text-muted/30 text-center mt-2">Never summarizes. Built on Adler, Luhmann, and cognitive science.</p></div></div>
+</div>
+</section>
+
+<script>
+// === JS HEALTH CHECK ===
+(function(){
+  var el = document.getElementById("jsCheck");
+  el.textContent = "JS OK";
+  el.style.background = "#7B9A6B33";
+  el.style.color = "#7B9A6B";
+  el.style.border = "1px solid #7B9A6B55";
+  el.classList.remove("hidden");
+  el.onclick = function(){ el.style.display = "none"; };
+})();
+
+var allNotes = [];
+var cfg = { key: localStorage.getItem("rt_k") || "", url: localStorage.getItem("rt_u") || "https://api.openai.com/v1", model: localStorage.getItem("rt_m") || "gpt-4o-mini" };
+var mid = 0;
+
+function E(s) { var d = document.createElement("div"); d.textContent = s || ""; return d.innerHTML; }
+function F(t) { if (!t) return ""; var h = E(t); h = h.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>"); h = h.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, "<em>$1</em>"); h = h.replace(/\n\n/g, "</p><p style='margin-top:0.6em'>"); h = h.replace(/\n/g, "<br>"); return "<p>" + h + "</p>"; }
+function toast(m) { var old = document.querySelectorAll(".tst"); for (var i = 0; i < old.length; i++) old[i].remove(); var el = document.createElement("div"); el.className = "tst"; el.innerHTML = '<i class="fas fa-circle-info text-accent mr-2 text-xs"></i>' + E(m); document.body.appendChild(el); setTimeout(function() { el.style.opacity = "0"; el.style.transition = "opacity .3s"; setTimeout(function() { el.remove(); }, 300); }, 2600); }
+
+// === NAV ===
+function goHome() { document.getElementById("pgL").classList.remove("hidden"); document.getElementById("pgA").classList.add("hidden"); window.scrollTo({ top: 0, behavior: "smooth" }); }
+function openApp(mode, step) { document.getElementById("pgL").classList.add("hidden"); document.getElementById("pgA").classList.remove("hidden"); document.getElementById("pgA").style.height = "100dvh"; setMode(mode, step); }
+function setMode(mode, step) {
+  document.getElementById("tD").classList.toggle("on", mode === "deepread");
+  document.getElementById("tC").classList.toggle("on", mode === "chat");
+  document.getElementById("mDR").classList.toggle("hidden", mode !== "deepread");
+  document.getElementById("mCH").classList.toggle("hidden", mode !== "chat");
+  var sp = mode === "deepread" && drS.step === "think";
+  document.getElementById("dPW").style.display = sp ? "flex" : "none";
+  document.getElementById("dPD").classList.toggle("hidden", !sp);
+  if (mode === "deepread" && step) drGo(step);
+  if (mode === "chat") { renderQA(); refBtn(); }
+}
+function drBack() { var st = ["input","claims","think","collect"], i = st.indexOf(drS.step); if (i > 0) drGo(st[i - 1]); else goHome(); }
+
+// === DEEP READ STATE ===
+var drS = { step: "input", claims: [], idx: 0, notes: [], ref: {}, st: {}, stx: {}, an: {}, rev: {}, title: "" };
+
+var demoCl = [
+  { text: "There is a fundamental difference between being familiar with an author's words and understanding their ideas.", reasoning: "Familiarity means you can recognize something when you see it again. Understanding means you could explain it to someone else, apply it in a new context, or spot when it is being misused. These are completely different cognitive operations.", fq: "Think of something you are familiar with. Could you teach it from scratch without any reference?" },
+  { text: "Highlighting and re-reading create passive recognition, not active understanding.", reasoning: "Research by Rozenblit & Keil at Yale shows that people consistently overestimate how well they understand complex phenomena. Re-reading strengthens recognition without strengthening the ability to reconstruct or apply the idea.", fq: "Have you ever re-read notes and felt like you knew them, then blanked when asked to explain?" },
+  { text: "Summarizing a book is often worse than useless because it creates the illusion that you absorbed the content.", reasoning: "When you summarize, you compress the author's ideas using the author's own framework. You have not translated the idea into your mental models, you have just made it smaller. Worse, writing the summary gives you a dopamine hit of productivity that makes you LESS likely to revisit the ideas.", fq: "Look at your last book summary notes. Are they in your words, or a compressed version of the author?" },
+  { text: "The real question is not what does this book say but what does this book do to what I already believe?", reasoning: "This is Adler's core insight. Information transfer is the lowest level of reading. The highest level is about placing the book in conversation with your existing knowledge and watching what shifts.", fq: "What is the last book that actually changed your mind about something? Not added information but changed a belief." },
+  { text: "Luhmann's system did not store information, it generated thinking.", reasoning: "His Zettelkasten had a crucial design constraint: every note had to be in his own words, standalone, and linked to at least one other note. This forced translation, connection, and contextualization. The value was not retrieval, it was the thinking each note required.", fq: "If your note-taking system disappeared tomorrow, would you have lost knowledge, or just the thinking you did while writing?" },
+  { text: "A book has done its work only when it has changed something in you.", reasoning: "This redefines reading from consumption to transformation. Most reading is confirmatory. But Adler argues the purpose is to be confronted with ideas that create productive friction with your existing mental models.", fq: "Do you gravitate toward books that confirm your views or challenge them? Be honest." }
+];
+
+function startDemo() {
+  drS.claims = [];
+  for (var i = 0; i < demoCl.length; i++) {
+    var c = demoCl[i];
+    drS.claims.push({ id: i, text: c.text, reasoning: c.reasoning, fq: c.fq });
+  }
+  drS.title = "On Reading to Think";
+  drS.step = "claims";
+  openApp("deepread", "claims");
+}
+
+function procText() {
+  var t = document.getElementById("uT").value.trim();
+  if (t.length < 100) return;
+  drS.title = "Your Text";
+  drS.claims = extCl(t);
+  if (!drS.claims.length) { toast("Could not extract claims. Try a longer passage."); return; }
+  drGo("claims");
+}
+
+function extCl(text) {
+  var ss = text.match(/[^.!?]+[.!?]+/g) || [];
+  var sig = ["argues","asserts","suggests","shows","proves","means","therefore","because","however","fundamental","crucial","important","difference","requires","should","must","never","always","only","not","worse than","enemy","purpose","real question"];
+  var sc = [];
+  for (var i = 0; i < ss.length; i++) {
+    var s = ss[i], score = 0, lo = s.toLowerCase().trim(), w = lo.split(/\s+/).length;
+    if (w >= 10 && w <= 40) score += 3; else if (w > 40) score += 1; else score -= 2;
+    for (var j = 0; j < sig.length; j++) { if (lo.indexOf(sig[j]) !== -1) score += 1.5; }
+    if (s.indexOf("?") === -1) score += 1; else score -= 1;
+    if (s.indexOf(",") !== -1 || s.indexOf(";") !== -1) score += 0.5;
+    sc.push({ text: s.trim(), score: Math.max(score, 0) });
+  }
+  sc.sort(function(a, b) { return b.score - a.score; });
+  var res = [], cnt = Math.min(6, sc.length);
+  for (var k = 0; k < cnt; k++) {
+    var it = sc[k], ix = text.indexOf(it.text), cx = "";
+    if (ix !== -1) { var st = Math.max(0, ix - 150), en = Math.min(text.length, ix + it.text.length + 150); cx = text.slice(st, en).replace(it.text, "..."); }
+    res.push({ id: k, text: it.text, reasoning: cx ? 'Context: "' + cx.trim() + '"' : "Consider what the author means and why.", fq: "What do you already believe about this?" });
+  }
+  return res;
+}
+
+function drGo(step) {
+  drS.step = step;
+  document.getElementById("dI").classList.add("hidden");
+  document.getElementById("dCl").classList.add("hidden");
+  document.getElementById("dTh").classList.add("hidden");
+  document.getElementById("dCo").classList.add("hidden");
+  var m = { input: "dI", claims: "dCl", think: "dTh", collect: "dCo" };
+  if (m[step]) document.getElementById(m[step]).classList.remove("hidden");
+  var sp = step === "think";
+  document.getElementById("dPW").style.display = sp ? "flex" : "none";
+  document.getElementById("dPD").classList.toggle("hidden", !sp);
+  if (step === "claims") rendCl();
+  if (step === "think") rendTh();
+  if (step === "collect") rendCo();
+  document.getElementById("mDR").scrollTop = 0;
+  upProg();
+}
+
+function upProg() {
+  var t = drS.claims.length, d = 0;
+  for (var k in drS.an) { if (drS.an[k]) d++; }
+  document.getElementById("dPB").style.width = (t > 0 ? Math.round(d / t * 100) : 0) + "%";
+  document.getElementById("dPT").textContent = d + "/" + t + " notes";
+}
+
+function rendCl() {
+  var c = document.getElementById("cLs"); c.innerHTML = "";
+  for (var i = 0; i < drS.claims.length; i++) {
+    var cl = drS.claims[i], dn = !!drS.an[i], d = document.createElement("div");
+    d.className = "cr anim-up" + (dn ? " done" : "");
+    d.style.animationDelay = (i * 0.06) + "s";
+    d.innerHTML = '<div class="flex items-start gap-3"><span class="flex-shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center mt-0.5 ' + (dn ? "bg-sage/20 text-sage" : "bg-bdr text-muted") + '">' + (dn ? '<i class="fas fa-check text-[10px]"></i>' : (i + 1)) + '</span><p class="text-sm leading-relaxed ' + (dn ? "text-muted" : "text-fg") + '">' + E(cl.text) + "</p></div>";
+    c.appendChild(d);
+  }
+}
+
+function beginThink() {
+  var si = 0;
+  for (var i = 0; i < drS.claims.length; i++) { if (!drS.an[i]) { si = i; break; } if (i === drS.claims.length - 1) si = 0; }
+  drS.idx = si; drGo("think");
+}
+
+function rendTh() {
+  var i = drS.idx, cl = drS.claims[i]; if (!cl) return;
+  var hR = drS.ref[i] !== undefined, iR = !!drS.rev[i], hS = drS.st[i] !== undefined, hN = !!drS.an[i];
+  var h = '<div class="anim-up">';
+  h += '<div class="flex items-center gap-3 mb-6"><span class="text-xs text-muted tracking-wider uppercase">Claim ' + (i + 1) + ' of ' + drS.claims.length + '</span><div class="flex-1 h-px bg-bdr"></div></div>';
+  h += '<div class="bg-card border border-bdr-l rounded-xl p-6 mb-8"><p class="serif text-lg md:text-xl leading-relaxed text-fg">"' + E(cl.text) + '"</p></div>';
+
+  h += '<div class="mb-8"><div class="flex items-center gap-2 mb-3"><div class="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center"><span class="text-accent text-[10px] font-bold">1</span></div><h3 class="font-semibold text-sm text-fg">Think First</h3>';
+  if (hR) h += '<span class="text-sage text-xs ml-auto"><i class="fas fa-check mr-1"></i>Done</span>';
+  h += '</div><p class="text-muted text-sm mb-3 ml-7">Before seeing what the author means, write what <span class="text-fg font-medium">you</span> believe.</p>';
+  h += '<div class="ml-7"><textarea id="rI" class="dr-ta" rows="4" placeholder="I think that...">' + (hR ? E(drS.ref[i]) : "") + '</textarea></div></div>';
+
+  h += '<div class="ml-7 mb-8"><button id="rB" onclick="revR(' + i + ')" class="' + (iR ? "opacity-50 cursor-default" : "") + ' flex items-center gap-2 text-accent hover:text-accent-h transition-colors text-sm font-medium bg-transparent border-none cursor-pointer font-[inherit]" ' + (iR ? "disabled" : "") + '><i class="fas fa-' + (iR ? "eye" : "eye-slash") + '"></i>' + (iR ? "Author&#39;s reasoning revealed" : "Reveal Author&#39;s Reasoning");
+  if (!iR) h += ' <i class="fas fa-arrow-right text-xs"></i>';
+  h += '</button></div>';
+
+  h += '<div id="rBl" class="reasoning-box ' + (iR ? "open" : "") + ' mb-8"><div class="ml-7 bg-[#141412] border border-bdr rounded-xl p-5"><div class="flex items-center gap-2 mb-3"><i class="fas fa-book-open text-accent text-sm"></i><span class="text-xs text-accent tracking-wider uppercase font-medium">Author&#39;s Reasoning</span></div>';
+  h += '<p class="text-sm leading-relaxed text-muted">' + E(cl.reasoning) + '</p>';
+  if (cl.fq) h += '<p class="text-sm text-fg/60 mt-3 italic">' + E(cl.fq) + '</p>';
+  h += '</div></div>';
+
+  h += '<div id="sSc" class="' + (iR ? "" : "opacity-30 pointer-events-none") + ' mb-8 transition-opacity duration-500"><div class="flex items-center gap-2 mb-3 ml-7"><div class="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center"><span class="text-accent text-[10px] font-bold">2</span></div><h3 class="font-semibold text-sm text-fg">Where Do You Stand?</h3>';
+  if (hS) h += '<span class="text-sage text-xs ml-auto"><i class="fas fa-check mr-1"></i>Done</span>';
+  h += '</div><div class="ml-7"><div class="mb-4"><input type="range" id="sSl" min="0" max="100" value="' + (hS ? drS.st[i] : 50) + '" oninput="upSL(this.value)"><div class="flex justify-between mt-2"><span class="text-xs text-terra">Strongly Disagree</span><span id="sLb" class="text-xs text-muted font-medium">Undecided</span><span class="text-xs text-sage">Strongly Agree</span></div></div>';
+  h += '<textarea id="sTx" class="dr-ta" rows="3" placeholder="Why? Be specific.">' + (hS && drS.stx[i] ? E(drS.stx[i]) : "") + '</textarea></div></div>';
+
+  h += '<div id="nSc" class="' + (iR ? "" : "opacity-30 pointer-events-none") + ' mb-10 transition-opacity duration-500"><div class="flex items-center gap-2 mb-3 ml-7"><div class="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center"><span class="text-accent text-[10px] font-bold">3</span></div><h3 class="font-semibold text-sm text-fg">Your Atomic Note</h3>';
+  if (hN) h += '<span class="text-sage text-xs ml-auto"><i class="fas fa-check mr-1"></i>Saved</span>';
+  h += '</div><p class="text-muted text-sm mb-3 ml-7">Write <span class="text-fg font-medium">one insight</span> in your own words. Not a summary.</p>';
+  h += '<div class="ml-7"><textarea id="nI" class="dr-ta" rows="4" placeholder="The key insight for me is...">' + (hN ? E(drS.an[i]) : "") + '</textarea></div></div>';
+
+  h += '<div class="flex justify-between items-center ml-7">';
+  if (i > 0) h += '<button onclick="prevCl()" class="bs text-sm"><i class="fas fa-arrow-left mr-2"></i>Previous</button>';
+  else h += '<div></div>';
+  h += '<button onclick="saveNC(' + i + ')" class="bm">' + (hN ? 'Update & Continue' : 'Save Note & Continue') + ' <i class="fas fa-arrow-right ml-2 text-sm"></i></button></div></div>';
+
+  document.getElementById("tCt").innerHTML = h;
+
+  var rI = document.getElementById("rI");
+  if (rI) { (function(x) { rI.addEventListener("input", function() { drS.ref[x] = rI.value; }); })(i); }
+  var sSl = document.getElementById("sSl");
+  if (sSl) { (function(x) { sSl.addEventListener("input", function() { drS.st[x] = parseInt(sSl.value); upSL(sSl.value); }); })(i); }
+  var sTx = document.getElementById("sTx");
+  if (sTx) { (function(x) { sTx.addEventListener("input", function() { drS.stx[x] = sTx.value; }); })(i); }
+  var nI = document.getElementById("nI");
+  if (nI) { (function(x) { nI.addEventListener("input", function() { drS.an[x] = nI.value; }); })(i); }
+  if (hS) upSL(drS.st[i]);
+}
+
+function revR(idx) {
+  var v = document.getElementById("rI").value.trim();
+  if (v.length < 10) { toast("Write at least a sentence first. The friction is the point."); document.getElementById("rI").focus(); return; }
+  drS.ref[idx] = v; drS.rev[idx] = true;
+  document.getElementById("rBl").classList.add("open");
+  var b = document.getElementById("rB"); b.disabled = true; b.classList.add("opacity-50", "cursor-default");
+  b.innerHTML = '<i class="fas fa-eye"></i> Author&#39;s reasoning revealed';
+  document.getElementById("sSc").classList.remove("opacity-30", "pointer-events-none");
+  document.getElementById("nSc").classList.remove("opacity-30", "pointer-events-none");
+}
+
+function upSL(v) {
+  var l = document.getElementById("sLb"); if (!l) return; v = parseInt(v);
+  if (v < 25) { l.textContent = "Strongly Disagree"; l.className = "text-xs text-terra font-medium"; }
+  else if (v < 40) { l.textContent = "Lean Disagree"; l.className = "text-xs text-terra/70 font-medium"; }
+  else if (v < 60) { l.textContent = "Undecided"; l.className = "text-xs text-muted font-medium"; }
+  else if (v < 75) { l.textContent = "Lean Agree"; l.className = "text-xs text-sage/70 font-medium"; }
+  else { l.textContent = "Strongly Agree"; l.className = "text-xs text-sage font-medium"; }
+}
+
+function prevCl() { if (drS.idx > 0) { drS.idx--; rendTh(); document.getElementById("mDR").scrollTop = 0; } }
+
+function saveNC(idx) {
+  drS.ref[idx] = (document.getElementById("rI") || {}).value || "";
+  drS.st[idx] = parseInt((document.getElementById("sSl") || {}).value || 50);
+  drS.stx[idx] = (document.getElementById("sTx") || {}).value || "";
+  drS.an[idx] = (document.getElementById("nI") || {}).value || "";
+  if (!drS.an[idx]) { toast("Write your atomic note first."); if (document.getElementById("nI")) document.getElementById("nI").focus(); return; }
+  var nw = true;
+  for (var j = 0; j < drS.notes.length; j++) { if (drS.notes[j].ci === idx) { drS.notes[j].note = drS.an[idx]; drS.notes[j].st = drS.st[idx]; nw = false; break; } }
+  if (nw) {
+    drS.notes.push({ id: drS.notes.length + 1, ci: idx, claim: drS.claims[idx].text, note: drS.an[idx], st: drS.st[idx] });
+    allNotes.push({ content: drS.an[idx], book: drS.title || "Deep Read", ts: Date.now(), type: "dr" });
+    localStorage.setItem("rt_notes", JSON.stringify(allNotes)); refNB(); rendNL();
+  }
+  upProg();
+  if (idx + 1 < drS.claims.length) { drS.idx = idx + 1; rendTh(); document.getElementById("mDR").scrollTop = 0; }
+  else drGo("collect");
+}
+
+function rendCo() {
+  var g = document.getElementById("cGr"); g.innerHTML = "";
+  if (!drS.notes.length) { g.innerHTML = '<p class="text-muted text-center py-12 col-span-2">No notes.</p>'; return; }
+  for (var i = 0; i < drS.notes.length; i++) {
+    var n = drS.notes[i], sc = n.st < 35 ? "text-terra" : n.st > 65 ? "text-sage" : "text-accent";
+    var sw = n.st < 25 ? "Strongly Disagree" : n.st < 40 ? "Lean Disagree" : n.st < 60 ? "Undecided" : n.st < 75 ? "Lean Agree" : "Strongly Agree";
+    var d = document.createElement("div"); d.className = "nc anim-up"; d.style.animationDelay = (i * 0.08) + "s";
+    d.innerHTML = '<div class="flex items-center justify-between mb-3"><span class="text-xs text-muted">#' + n.id + '</span><span class="text-xs ' + sc + ' font-medium">' + sw + '</span></div><p class="text-fg text-sm leading-relaxed mb-4">' + E(n.note) + '</p><div class="border-t border-bdr pt-3"><p class="text-xs text-muted/60 italic">' + E(n.claim.substring(0, 80)) + (n.claim.length > 80 ? "..." : "") + "</p></div>";
+    g.appendChild(d);
+  }
+}
+
+// === CHAT ===
+var cMsgs = [], cStr = false, cCtrl = null, cBk = "";
+
+function cSP() {
+  var p = "You are a Socratic reading companion. NOT a summarizer.\n\nRULES:\n1. NEVER summarize. Refuse and explain why.\n2. Use Socratic questioning, never give direct answers.\n3. Be honest about shallow understanding. No false encouragement.\n4. Distinguish recognizing vs reconstructing ideas.\n5. Keep responses focused. One sharp question at a time.\n6. If user agrees with everything, probe harder.\n\nWHEN USER SHARES LEARNINGS:\n- Check alignment with author intent\n- Detect illusion of fluency\n- Find missed concepts that challenge their beliefs\n- Ask: can you explain without the author language?\n- Never confirm understanding too easily\n\nBOOK SUGGESTIONS: recommend books creating FRICTION with current thinking.\n\nATOMIC NOTES: one idea, user own words, what CHANGED not what author said.\n\n";
+  if (cBk) p += "CURRENT BOOK: " + cBk; else p += "NO BOOK SELECTED. Discovery mode.";
+  return p;
+}
+
+function gQA() {
+  var bk = cBk, has = cMsgs.length > 0, lu = null;
+  for (var i = cMsgs.length - 1; i >= 0; i--) { if (cMsgs[i].role === "user") { lu = cMsgs[i]; break; } }
+  var sh = lu && lu.content.length > 80;
+  if (!bk && !has) return [{ l: "Help me choose a book", i: "fa-compass", p: "I want to read something that will genuinely challenge my current thinking. Can you ask me a few questions to figure out what I should read next?" }, { l: "I know what I am reading", i: "fa-book", a: "focus" }];
+  if (!bk && has) return [{ l: "Suggest a book", i: "fa-compass", p: "Based on what we discussed, what book should I read next? Explain why it would create productive friction with my thinking." }];
+  if (sh) return [{ l: "What did I miss?", i: "fa-magnifying-glass", p: "Based on what I shared about this chapter, are there key points or nuances I missed or glossed over? Be specific." }, { l: "Did I understand correctly?", i: "fa-scale-balanced", p: "Compare what I said I learned with what the author actually intended. Where does my understanding differ?" }, { l: "Write an atomic note", i: "fa-pen-nib", p: "Help me write one atomic note about what actually changed in my thinking. Not a summary." }];
+  return [{ l: "I just finished a chapter", i: "fa-book-open", a: "focus" }, { l: "What should I focus on?", i: "fa-crosshairs", p: "What should I pay special attention to in this book? What do readers most commonly misunderstand?" }, { l: "Am I reading this right?", i: "fa-route", p: "Am I approaching this book correctly? What is the most common mistake readers make with this kind of book?" }];
+}
+
+function renderQA() {
+  var bar = document.getElementById("qBr"), box = document.getElementById("qCs"), acts = gQA();
+  if (!cMsgs.length && !cBk) { bar.classList.add("hidden"); return; }
+  bar.classList.remove("hidden");
+  var h = "";
+  for (var i = 0; i < acts.length; i++) h += '<button onclick="fireQA(' + i + ')" class="qc flex items-center gap-1.5"><i class="fas ' + acts[i].i + ' text-accent/60 text-[10px]"></i>' + E(acts[i].l) + "</button>";
+  box.innerHTML = h;
+}
+
+function fireQA(idx) {
+  var a = gQA()[idx]; if (!a) return;
+  if (a.a === "focus") { document.getElementById("cIn").focus(); return; }
+  if (a.p) { var inp = document.getElementById("cIn"); inp.value = a.p; inp.focus(); inp.style.height = "auto"; inp.style.height = Math.min(inp.scrollHeight, 150) + "px"; refBtn(); }
+}
+
+function sendMsg() {
+  var inp = document.getElementById("cIn"), txt = inp.value.trim();
+  if (!txt || cStr) return;
+  if (!cfg.key) { openSet(); toast("Set your API key first."); return; }
+  document.getElementById("cWe").classList.add("hidden");
+  document.getElementById("cMs").classList.remove("hidden");
+  var um = { role: "user", content: txt, id: ++mid };
+  cMsgs.push(um); rendCM(um);
+  inp.value = ""; inp.style.height = "auto"; refBtn(); cSB(); renderQA();
+  doStream();
+}
+
+function doStream() {
+  cStr = true; cCtrl = new AbortController(); refBtn();
+  var am = [{ role: "system", content: cSP() }];
+  for (var i = 0; i < cMsgs.length; i++) am.push({ role: cMsgs[i].role, content: cMsgs[i].content });
+  var ai = { role: "assistant", content: "", id: ++mid };
+  cMsgs.push(ai);
+  var el = rendCM(ai, true), ce = el.querySelector(".cmsg");
+
+  fetch(cfg.url.replace(/\/+$/, "") + "/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + cfg.key },
+    body: JSON.stringify({ model: cfg.model, messages: am, stream: true, temperature: 0.7, max_tokens: 2048 }),
+    signal: cCtrl.signal
+  }).then(function(res) {
+    if (!res.ok) return res.json().then(function(ed) { throw new Error((ed.error && ed.error.message) || "Error"); }).catch(function() { throw new Error(res.status === 401 ? "Invalid API key. Click gear icon." : "Something went wrong."); });
+    var reader = res.body.getReader(), dec = new TextDecoder(), buf = "";
+    function read() {
+      reader.read().then(function(r) {
+        if (r.done) { cStr = false; cCtrl = null; refBtn(); ce.innerHTML = F(ai.content); addCAct(el, ai); cSB(); return; }
+        buf += dec.decode(r.value, { stream: true });
+        var ls = buf.split("\n"); buf = ls.pop() || "";
+        for (var j = 0; j < ls.length; j++) {
+          var ln = ls[j].trim();
+          if (ln.indexOf("data: ") !== 0) continue;
+          var d = ln.slice(6); if (d === "[DONE]") continue;
+          try { var p = JSON.parse(d), delta = p.choices && p.choices[0] && p.choices[0].delta && p.choices[0].delta.content; if (delta) { ai.content += delta; ce.innerHTML = F(ai.content); cSB(); } } catch (e) {}
+        }
+        read();
+      }).catch(function(err) {
+        if (err.name !== "AbortError") { ai.content = ""; ce.innerHTML = '<div class="flex items-start gap-2 text-terra text-sm"><i class="fas fa-circle-exclamation mt-0.5"></i><span>' + E(err.message) + '</span></div>'; if (err.message.indexOf("API key") !== -1) ce.innerHTML += '<button onclick="openSet()" class="text-accent text-xs underline mt-2 block cursor-pointer bg-transparent border-none font-[inherit]">Open Settings</button>'; }
+        cStr = false; cCtrl = null; refBtn(); cSB();
+      });
+    }
+    read();
+  }).catch(function(err) {
+    if (err.name === "AbortError") { if (!ai.content) ai.content = "(Stopped)"; }
+    else { ai.content = ""; ce.innerHTML = '<div class="flex items-start gap-2 text-terra text-sm"><i class="fas fa-circle-exclamation mt-0.5"></i><span>' + E(err.message) + '</span></div>'; }
+    cStr = false; cCtrl = null; refBtn(); ce.innerHTML = F(ai.content); cSB();
+  });
+}
+
+function rendCM(msg, loading) {
+  var c = document.getElementById("cMs"), isU = msg.role === "user", d = document.createElement("div");
+  d.className = "mw anim-up flex " + (isU ? "justify-end" : "justify-start");
+  if (isU) d.innerHTML = '<div class="max-w-[85%] md:max-w-[70%]"><div class="bg-accent/[0.08] border border-accent/20 rounded-2xl rounded-br-md px-4 py-3"><p class="text-sm leading-relaxed text-fg whitespace-pre-wrap">' + E(msg.content) + "</p></div></div>";
+  else d.innerHTML = '<div class="max-w-[90%] md:max-w-[80%] flex gap-3"><div class="w-7 h-7 rounded-lg bg-card border border-bdr flex items-center justify-center flex-shrink-0 mt-0.5"><i class="fas fa-brain text-accent text-[10px]"></i></div><div class="flex-1 min-w-0"><div class="border-l-2 border-accent/20 pl-4 py-0.5"><div class="cmsg text-sm leading-relaxed text-fg/85">' + (loading && !msg.content ? '<div class="dots py-2"><span></span> <span></span> <span></span></div>' : F(msg.content)) + '</div></div><div class="mha flex items-center gap-1 mt-1.5 ml-5"></div></div></div>';
+  c.appendChild(d); return d;
+}
+
+function addCAct(el, msg) {
+  var ab = el.querySelector(".mha");
+  if (ab && msg.content) ab.innerHTML = '<button onclick="cpMsg(' + msg.id + ')" class="text-[11px] text-muted/40 hover:text-muted px-2 py-1 rounded transition-colors cursor-pointer bg-transparent border-none font-[inherit]"><i class="fas fa-copy mr-1"></i>Copy</button><button onclick="svNote(' + msg.id + ')" class="text-[11px] text-muted/40 hover:text-accent px-2 py-1 rounded transition-colors cursor-pointer bg-transparent border-none font-[inherit]"><i class="fas fa-bookmark mr-1"></i>Save</button>';
+}
+
+function cpMsg(id) { for (var i = 0; i < cMsgs.length; i++) { if (cMsgs[i].id === id) { navigator.clipboard.writeText(cMsgs[i].content).then(function() { toast("Copied."); }); return; } } }
+function svNote(id) { for (var i = 0; i < cMsgs.length; i++) { if (cMsgs[i].id === id) { for (var j = 0; j < allNotes.length; j++) { if (allNotes[j].mid === id) { toast("Already saved."); return; } } allNotes.push({ mid: id, content: cMsgs[i].content, book: cBk || "Chat", ts: Date.now(), type: "chat" }); localStorage.setItem("rt_notes", JSON.stringify(allNotes)); refNB(); rendNL(); toast("Saved."); return; } } }
+
+function refBtn() {
+  var btn = document.getElementById("sBt"), ico = document.getElementById("sIc"), inp = document.getElementById("cIn");
+  if (cStr) { btn.disabled = false; ico.className = "fas fa-stop text-sm"; btn.style.background = "#B07060"; }
+  else { btn.disabled = !inp.value.trim(); ico.className = "fas fa-arrow-up text-sm"; btn.style.background = "#C8965A"; }
+}
+
+function cSB() { var a = document.getElementById("cSc"); requestAnimationFrame(function() { a.scrollTo({ top: a.scrollHeight, behavior: "smooth" }); }); }
+
+// === NOTES ===
+function togNotes() {
+  var p = document.getElementById("nPn"), o = document.getElementById("nOv"), open = !p.classList.contains("shut");
+  if (open) { p.classList.add("shut"); setTimeout(function() { o.classList.add("hidden"); }, 350); }
+  else { o.classList.remove("hidden"); requestAnimationFrame(function() { p.classList.remove("shut"); }); }
+}
+
+function rendNL() {
+  var c = document.getElementById("nLs");
+  if (!allNotes.length) { c.innerHTML = '<p class="text-muted text-sm text-center py-12">No notes yet.</p>'; return; }
+  var h = "";
+  for (var i = allNotes.length - 1; i >= 0; i--) {
+    var n = allNotes[i], pl = n.content.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().substring(0, 150);
+    var bg = n.type === "dr" ? '<span class="text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded ml-1">Deep Read</span>' : '<span class="text-[9px] bg-sage/15 text-sage px-1.5 py-0.5 rounded ml-1">Chat</span>';
+    h += '<div class="bg-card border border-bdr rounded-lg p-3 anim-up" style="animation-delay:' + (i * 0.04) + 's"><div class="flex items-center justify-between mb-2"><span class="text-[10px] text-muted/70">' + E(n.book) + bg + '</span><button onclick="delN(' + n.ts + ')" class="text-muted/30 hover:text-terra text-xs transition-colors cursor-pointer bg-transparent border-none"><i class="fas fa-xmark"></i></button></div><p class="text-xs text-fg/60 leading-relaxed">' + E(pl) + (pl.length >= 150 ? "..." : "") + "</p></div>";
+  }
+  c.innerHTML = h;
+}
+
+function delN(ts) { allNotes = allNotes.filter(function(n) { return n.ts !== ts; }); localStorage.setItem("rt_notes", JSON.stringify(allNotes)); refNB(); rendNL(); }
+function clrNotes() { if (!allNotes.length) return; allNotes = []; localStorage.setItem("rt_notes", "[]"); refNB(); rendNL(); toast("Notes cleared."); }
+function refNB() { var b = document.getElementById("nBd"); if (allNotes.length) { b.textContent = allNotes.length; b.classList.remove("hidden"); b.style.display = "flex"; } else b.classList.add("hidden"); }
+
+// === SETTINGS ===
+function openSet() {
+  document.getElementById("sK").value = cfg.key; document.getElementById("sU").value = cfg.url; document.getElementById("sM").value = cfg.model;
+  var m = document.getElementById("setMod"), b = document.getElementById("setBox");
+  m.style.opacity = "1"; m.style.pointerEvents = "auto"; b.style.transform = "scale(1)"; b.style.opacity = "1";
+  setTimeout(function() { document.getElementById("sK").focus(); }, 200);
+}
+function closeSet() { var m = document.getElementById("setMod"), b = document.getElementById("setBox"); m.style.opacity = "0"; m.style.pointerEvents = "none"; b.style.transform = "scale(.95)"; b.style.opacity = "0"; }
+function saveSet() {
+  var k = document.getElementById("sK").value.trim(); if (!k) { toast("API key is required."); return; }
+  cfg.key = k; cfg.url = document.getElementById("sU").value.trim() || "https://api.openai.com/v1"; cfg.model = document.getElementById("sM").value.trim() || "gpt-4o-mini";
+  localStorage.setItem("rt_k", cfg.key); localStorage.setItem("rt_u", cfg.url); localStorage.setItem("rt_m", cfg.model);
+  closeSet(); toast("Settings saved.");
+}
+function togEye() { var i = document.getElementById("sK"), e = document.getElementById("sE"); if (i.type === "password") { i.type = "text"; e.className = "fas fa-eye-slash"; } else { i.type = "password"; e.className = "fas fa-eye"; } }
+
+// === INIT ===
+document.addEventListener("DOMContentLoaded", function() {
+  var ci = document.getElementById("cIn");
+  ci.addEventListener("input", function() { ci.style.height = "auto"; ci.style.height = Math.min(ci.scrollHeight, 150) + "px"; refBtn(); });
+  ci.addEventListener("keydown", function(e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (cStr) { if (cCtrl) cCtrl.abort(); } else sendMsg(); } });
+
+  var ut = document.getElementById("uT");
+  ut.addEventListener("input", function() { document.getElementById("cCt").textContent = ut.value.trim().length + " characters"; document.getElementById("pBt").disabled = ut.value.trim().length < 100; });
+
+  try { var sn = localStorage.getItem("rt_notes"); if (sn) allNotes = JSON.parse(sn); } catch (e) {}
+  refNB(); rendNL();
+
+  var sb = localStorage.getItem("rt_bk"); if (sb) { cBk = sb; document.getElementById("bF").value = sb; }
+  if (!cfg.key) setTimeout(openSet, 500);
+
+  console.log("Read to Think - initialized");
+});
+</script>
+</body>
+</html>

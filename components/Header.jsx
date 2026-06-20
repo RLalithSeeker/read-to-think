@@ -20,6 +20,7 @@ export default function Header({ mode, setMode, onHome, drS }) {
           <div className="h-4 w-px bg-bdr" />
           <div className="flex gap-1 bg-card rounded-lg p-1">
             <button onClick={() => setMode("deepread")} className={"tb" + (mode === "deepread" ? " on" : "")}><i className="fas fa-layer-group sm:mr-1.5 text-xs" /><span className="hidden sm:inline">Deep Read</span></button>
+            <button onClick={() => setMode("read")} className={"tb" + (mode === "read" ? " on" : "")}><i className="fas fa-book-open sm:mr-1.5 text-xs" /><span className="hidden sm:inline">Read</span></button>
             <button onClick={() => setMode("chat")} className={"tb" + (mode === "chat" ? " on" : "")}><i className="fas fa-comments sm:mr-1.5 text-xs" /><span className="hidden sm:inline">AI Companion</span></button>
           </div>
         </div>
